@@ -1,12 +1,14 @@
 import utils from "./utils"
 
 const gravity = 1
-const friction = .8
+const floorFriction = .95
+
 const canvas = document.querySelector("canvas")
 const c = canvas.getContext("2d")
 
-canvas.width = innerWidth
-canvas.height = innerHeight
+
+canvas.width = innerWidth - 100
+canvas.height = innerHeight - 100
 
 const mouse = {
   x: innerWidth / 2,
@@ -46,27 +48,49 @@ Object.prototype.draw = function() {
 }
 
 Object.prototype.update = function() {
-  if(this.y + this.radius > canvas.height)this.velocityY = -this.velocityY * friction
+  if(this.y + this.radius+10 > canvas.height){
+    this.velocityY = -this.velocityY * floorFriction
+    this.velocityX = this.velocityX * floorFriction
+  }
   else this.velocityY += gravity
   if(this.velocityY === -0 || this.velocityY.toString().split("").includes("e")){
     this.velocityY = 0
     this.ready = true
+    this.moving = false
   }
-  if(this.x + this.radius > canvas.width)this.velocityX = -this.velocityX * 0
+  if(this.x + this.radius + 10 > canvas.width)this.velocityX = -this.velocityX
+  if(this.x + this.radius + 10 < 50) this.velocityX = -this.velocityX * .95
 
   this.y += this.velocityY
   this.x += this.velocityX
-  console.log(this.velocityY)
-  console.log(this.velocityX)
+  // console.log(this.velocityY)
+  // console.log(this.velocityX)
   this.draw()
 }
 
 // Implementation
 let ball
 function init() {
-  ball = new GolfBall(canvas.width/2,canvas.height/2,1,10,"black")
+  ball = new GolfBall(100,canvas.height/2,1,10,"black")
 }
 
+let charCode
+document.onkeydown = (e) => {
+  charCode = e.keyCode
+  console.log(charCode,e.code)
+  if(charCode === 38||charCode === 87){//up
+    ball.velocityY += 10
+  }
+  // if(charCode === 115){//down
+  //   ball.velocityY -= 10
+  // }
+  if(charCode === 37||charCode === 65){//left
+    ball.velocityX -= 10
+  }
+  if(charCode === 39||charCode === 68){//right
+    ball.velocityX += 10
+  }
+}
 // Animation Loop
 function animate() {
   requestAnimationFrame(animate)

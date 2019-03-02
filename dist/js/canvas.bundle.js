@@ -103,27 +103,28 @@ var _utils2 = _interopRequireDefault(_utils);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var gravity = 1;
-var friction = .8;
-var canvas = document.querySelector('canvas');
-var c = canvas.getContext('2d');
+var floorFriction = .95;
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+var canvas = document.querySelector("canvas");
+var c = canvas.getContext("2d");
+
+canvas.width = innerWidth - 100;
+canvas.height = innerHeight - 100;
 
 var mouse = {
   x: innerWidth / 2,
   y: innerHeight / 2
 };
 
-var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66'];
+var colors = ["#2185C5", "#7ECEFD", "#FFF6E5", "#FF7F66"];
 
 // Event Listeners
-addEventListener('mousemove', function (event) {
+addEventListener("mousemove", function (event) {
   mouse.x = event.clientX;
   mouse.y = event.clientY;
 });
 
-addEventListener('resize', function () {
+addEventListener("resize", function () {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
   init();
@@ -150,32 +151,57 @@ Object.prototype.draw = function () {
 };
 
 Object.prototype.update = function () {
-  if (this.y + this.radius > canvas.height) this.velocityY = -this.velocityY * friction;else this.velocityY += gravity;
+  if (this.y + this.radius + 10 > canvas.height) {
+    this.velocityY = -this.velocityY * floorFriction;
+    this.velocityX = this.velocityX * floorFriction;
+  } else this.velocityY += gravity;
   if (this.velocityY === -0 || this.velocityY.toString().split("").includes("e")) {
     this.velocityY = 0;
     this.ready = true;
+    this.moving = false;
   }
-  if (this.x + this.radius > canvas.width) this.velocityX = -this.velocityX * 0;
+  if (this.x + this.radius + 10 > canvas.width) this.velocityX = -this.velocityX;
+  if (this.x + this.radius + 10 < 50) this.velocityX = -this.velocityX * .95;
 
   this.y += this.velocityY;
   this.x += this.velocityX;
-  console.log(this.velocityY);
-  console.log(this.velocityX);
+  // console.log(this.velocityY)
+  // console.log(this.velocityX)
   this.draw();
 };
 
 // Implementation
 var ball = void 0;
 function init() {
-  ball = new GolfBall(canvas.width / 2, canvas.height / 2, 1, 10, "black");
+  ball = new GolfBall(100, canvas.height / 2, 1, 10, "black");
 }
 
+var charCode = void 0;
+document.onkeydown = function (e) {
+  charCode = e.keyCode;
+  console.log(charCode, e.code);
+  if (charCode === 38 || charCode === 87) {
+    //up
+    ball.velocityY += 10;
+  }
+  // if(charCode === 115){//down
+  //   ball.velocityY -= 10
+  // }
+  if (charCode === 37 || charCode === 65) {
+    //left
+    ball.velocityX -= 10;
+  }
+  if (charCode === 39 || charCode === 68) {
+    //right
+    ball.velocityX += 10;
+  }
+};
 // Animation Loop
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
   ball.update();
-  c.fillText('GolfWorld', mouse.x, mouse.y);
+  c.fillText("GolfWorld", mouse.x, mouse.y);
   // objects.forEach(object => {
   //  object.update()
   // })
@@ -197,18 +223,18 @@ animate();
 
 
 function randomIntFromRange(min, max) {
-    return Math.floor(Math.random() * (max - min + 1) + min);
+  return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 function randomColor(colors) {
-    return colors[Math.floor(Math.random() * colors.length)];
+  return colors[Math.floor(Math.random() * colors.length)];
 }
 
 function distance(x1, y1, x2, y2) {
-    var xDist = x2 - x1;
-    var yDist = y2 - y1;
+  var xDist = x2 - x1;
+  var yDist = y2 - y1;
 
-    return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+  return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
 }
 
 module.exports = { randomIntFromRange: randomIntFromRange, randomColor: randomColor, distance: distance };
