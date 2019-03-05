@@ -1,0 +1,13 @@
+#body{
+  background:black;
+  /* opacity:.1; */
+  z-index:1;
+}
+
+#canvas{
+  background-color:white;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  z-index:2;
+}

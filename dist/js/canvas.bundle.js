@@ -96,20 +96,24 @@
 "use strict";
 
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _utils = __webpack_require__(/*! ./utils */ "./src/utils.js");
 
 var _utils2 = _interopRequireDefault(_utils);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 var gravity = 1;
 var floorFriction = .95;
 
 var canvas = document.querySelector("canvas");
-var c = canvas.getContext("2d");
+var context = canvas.getContext("2d");
 
-canvas.width = innerWidth - 100;
-canvas.height = innerHeight - 100;
+canvas.width = innerWidth * .5;
+canvas.height = innerHeight * .9;
 
 var mouse = {
   x: innerWidth / 2,
@@ -125,15 +129,15 @@ addEventListener("mousemove", function (event) {
 });
 
 addEventListener("resize", function () {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  // canvas.width = innerWidth * .5
+  // canvas.height = innerHeight * .9
   init();
 });
 
-// Objects
-function GolfBall(x, y, velocityY, radius, color) {
+// Objects an' things
+function PinBall(x, y, velocityY, radius, color) {
   var velocityX = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
-
+  //constructor
   this.x = x;
   this.y = y;
   this.velocityY = velocityY;
@@ -142,15 +146,17 @@ function GolfBall(x, y, velocityY, radius, color) {
   this.color = color;
 }
 
-Object.prototype.draw = function () {
-  c.beginPath();
-  c.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-  c.fillStyle = this.color;
-  c.fill();
-  c.closePath();
+PinBall.prototype.draw = function () {
+  //draws ball to canvas
+  context.beginPath();
+  context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+  context.fillStyle = this.color;
+  context.fill();
+  context.closePath();
 };
 
-Object.prototype.update = function () {
+PinBall.prototype.update = function () {
+  //determines what happens to the ball
   if (this.y + this.radius + 10 > canvas.height) {
     this.velocityY = -this.velocityY * floorFriction;
     this.velocityX = this.velocityX * floorFriction;
@@ -170,14 +176,152 @@ Object.prototype.update = function () {
   this.draw();
 };
 
+var Wall = function () {
+  function Wall(x, y, color, width, height) {
+    _classCallCheck(this, Wall);
+
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.width = width;
+    this.height = height;
+  }
+
+  _createClass(Wall, [{
+    key: "draw",
+    value: function draw() {
+      context.beginPath();
+      context.lineWidth = "3";
+      context.strokeStyle = this.color;
+      context.rect(this.x, this.y, this.width, this.height);
+      context.stroke();
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      this.draw();
+    }
+  }]);
+
+  return Wall;
+}();
+
+var PaddleRight = function () {
+  function PaddleRight(color, width, height) {
+    _classCallCheck(this, PaddleRight);
+
+    this.moveX = canvas.width - 80; //bottom right
+    this.moveY = canvas.width - 100;
+    this.line1x = canvas.width - 80; //top right
+    this.line1y = canvas.width - 120;
+    this.line2x = canvas.width - 115;
+    this.line2y = canvas.width - 80;
+    this.line3x = canvas.width - 100;
+    this.line3y = canvas.width - 80;
+    this.color = color;
+    this.width = width;
+    this.height = height;
+  }
+
+  _createClass(PaddleRight, [{
+    key: "draw",
+    value: function draw() {
+      context.beginPath();
+      context.lineWidth = "3";
+      context.moveTo(this.moveX, this.moveY);
+      context.lineTo(this.line1x, this.line1y);
+      context.lineTo(this.line2x, this.line2y);
+      context.lineTo(this.line3x, this.line3y);
+      context.closePath();
+      context.stroke();
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      this.draw();
+    }
+  }]);
+
+  return PaddleRight;
+}();
+
+var PaddleLeft = function () {
+  function PaddleLeft(moveX, moveY, lr, color, width, height) {
+    _classCallCheck(this, PaddleLeft);
+
+    this.moveX = moveX;
+    this.moveY = moveY;
+    this.lr = lr;
+    this.color = color;
+    this.width = width;
+    this.height = height;
+  }
+
+  _createClass(PaddleLeft, [{
+    key: "draw",
+    value: function draw() {
+      context.beginPath();
+      context.lineWidth = "3";
+      context.moveTo(125, 65);
+      context.lineTo(125, 45);
+      context.lineTo(50, 125);
+      context.lineTo(70, 125);
+      context.closePath();
+      context.stroke();
+    }
+  }, {
+    key: "update",
+    value: function update() {
+      this.draw();
+    }
+  }]);
+
+  return PaddleLeft;
+}();
+
 // Implementation
-var ball = void 0;
+
+
+var ball = void 0,
+    paddleLeft = void 0,
+    paddleRight = void 0,
+    startWall = void 0; //vars
 function init() {
-  ball = new GolfBall(100, canvas.height / 2, 1, 10, "black");
+
+  startWall = new Wall(canvas.width - 50, //starting x
+  50, //starting y
+  "black", //color
+  10, //width
+  canvas.height - 50 //height
+  );
+
+  paddleRight = new PaddleRight(canvas.width / 1.8, // start x
+  canvas.height / 1.1, // start y
+  "right", //side of paddle
+  "black", //color
+  100, //width
+  10 //height
+  );
+
+  paddleLeft = new PaddleLeft(canvas.width / 4, //
+  canvas.height / 1.1, //
+  "left", //side of paddle
+  "black", //color
+  100, //width
+  10 //height
+  );
+
+  ball = new PinBall(canvas.width - 20, //location x
+  canvas.height - 20, //location y
+  0, //initial velocity
+  4, //width
+  "black" //color
+  );
 }
 
 var charCode = void 0;
 document.onkeydown = function (e) {
+  //usefull for movement based games but will need to refactor for paddles
   charCode = e.keyCode;
   console.log(charCode, e.code);
   if (charCode === 38 || charCode === 87) {
@@ -199,9 +343,12 @@ document.onkeydown = function (e) {
 // Animation Loop
 function animate() {
   requestAnimationFrame(animate);
-  c.clearRect(0, 0, canvas.width, canvas.height);
+  context.clearRect(0, 0, canvas.width, canvas.height);
   ball.update();
-  c.fillText("GolfWorld", mouse.x, mouse.y);
+  startWall.update();
+  paddleRight.update();
+  paddleLeft.update();
+  // context.fillText("GolfWorld", mouse.x, mouse.y)
   // objects.forEach(object => {
   //  object.update()
   // })
