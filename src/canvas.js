@@ -91,16 +91,16 @@ class Wall{
 
 }
 
-class PaddleRight{
+class PaddleLeft{
   constructor(color,width,height){
-    this.moveX = canvas.width - 80   //bottom right
-    this.moveY = canvas.width - 100
-    this.line1x = canvas.width - 80 //top right
-    this.line1y = canvas.width - 120
-    this.line2x = canvas.width - 115
-    this.line2y = canvas.width - 80
-    this.line3x = canvas.width - 100
-    this.line3y = canvas.width - 80
+    this.moveX = 80   //bottom right x
+    this.moveY = canvas.height - 100  //bottom right y
+    this.line1x = 80  //top right x
+    this.line1y = canvas.height - 120 //top right y
+    this.line2x = 115 //
+    this.line2y = canvas.height - 80
+    this.line3x = 100
+    this.line3y = canvas.height - 80
     this.color = color
     this.width = width
     this.height = height
@@ -122,11 +122,16 @@ class PaddleRight{
   }
 }
 
-class PaddleLeft{
+class PaddleRight{
   constructor(moveX,moveY,lr,color,width,height){
-    this.moveX = moveX
-    this.moveY = moveY
-    this.lr = lr
+    this.moveX = canvas.width - 125   //bottom right x
+    this.moveY = canvas.height - 65  //bottom right y
+    this.line1x = canvas.width - 125  //top right x
+    this.line1y = canvas.height - 45 //top right y
+    this.line2x = canvas.width - 50 //
+    this.line2y = canvas.height - 125
+    this.line3x = canvas.width - 70
+    this.line3y = canvas.height - 125
     this.color = color
     this.width = width
     this.height = height
@@ -135,10 +140,10 @@ class PaddleLeft{
   draw(){
     context.beginPath();
     context.lineWidth = "3"
-    context.moveTo(125, 65);
-    context.lineTo(125, 45);
-    context.lineTo(50, 125);
-    context.lineTo(70, 125)
+    context.moveTo(this.moveX, this.moveY);
+    context.lineTo(this.line1x,this.line1y)
+    context.lineTo(this.line2x,this.line2y)
+    context.lineTo(this.line3x,this.line3y)
     context.closePath();
     context.stroke();
   }
